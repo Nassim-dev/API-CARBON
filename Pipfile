@@ -7,6 +7,9 @@ name = "pypi"
 fastapi = "*"
 uvicorn = "*"
 
+[scripts]
+dev = "uvicorn main:app --reload"
+
 [dev-packages]
 
 [requires]
