@@ -1,0 +1,5 @@
+Pipfile*
+Dockerfile
+docker-compose.yml
+.env
+.gitignore

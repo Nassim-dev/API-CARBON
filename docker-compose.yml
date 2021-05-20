@@ -1,0 +1,27 @@
+version: "3.9"
+
+services: 
+    api:
+        build: .
+        container_name: app-service
+        ports: 
+            - "80:80"
+        command: uvicorn entry:app --host 0.0.0.0 --port 80 --reload
+        volumes: 
+            - ./api:/api
+        environment: 
+            - APP_ENV=development
+            - DEBUG=1
+        depends_on:
+            - database
+
+    database:
+        image: postgres:13-alpine
+        container_name: database-service
+        restart: always
+        ports: 
+            - "5432:5432"
+        environment: 
+            - POSTGRES_DB=tododb
+            - POSTGRES_USER=youness
+            - POSTGRES_PASSWORD=youness
