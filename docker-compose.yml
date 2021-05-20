@@ -3,10 +3,10 @@ version: "3.9"
 services: 
     api:
         build: .
-        container_name: app-service
+        container_name: api-service
         ports: 
             - "80:80"
-        command: uvicorn entry:app --host 0.0.0.0 --port 80 --reload
+        command: uvicorn api.entry:app --host 0.0.0.0 --port 80 --reload
         volumes: 
             - ./api:/api
         environment: 
