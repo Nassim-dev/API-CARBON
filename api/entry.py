@@ -15,6 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/{username}")
-def read_root(username):
-    return {"msg": username}
+@app.get("/")
+def read_root():
+    return {"msg": "J'adore le chocolat noir."}
