@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import tweepy
+import tweepy, os
 
 app = FastAPI()
 
@@ -13,7 +13,11 @@ app.add_middleware(
 )
 
 
-auth = tweepy.AppAuthHandler("ynLU7uJVRqWAmiqPdw8KSqxPu", "IByfALAjERVHR3Cr9pXp2eUkihyFimgOiyynR7DL0XDrvVjfHx")
+auth = tweepy.AppAuthHandler(
+    os.environ.get('TWITTER_API_KEY'), 
+    os.environ.get('TWITTER_SECRET_KEY')
+)
+
 api = tweepy.API(auth)
 
 
@@ -24,3 +28,7 @@ def read_root(user):
     for tweet in public_tweets:
         tweets.append(tweet.text)
     return {"msg": tweets}
+
+@app.get("/")
+def index():
+    return "Hello There 👋"
