@@ -21,7 +21,7 @@ auth = tweepy.AppAuthHandler(
 api = tweepy.API(auth)
 
 
-@app.get("/{user}")
+@app.get("/users/{user}")
 def read_root(user):
     public_tweets = api.user_timeline(user, count=10)
     tweets = []
