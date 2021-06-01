@@ -33,3 +33,8 @@ def read_root(user):
 @app.get("/")
 def index():
     return "Hello from branch test  👋"
+
+@app.get("/data/{user}")
+def lookup_data(user):
+    
+    return "Hello from branch test  👋"
