@@ -32,4 +32,4 @@ def read_root(user):
 
 @app.get("/")
 def index():
-    return "Hello Christiano 👋"
+    return "Hello  👋"
