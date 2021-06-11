@@ -40,88 +40,84 @@ def follow_user(user):
     followers = user.followers_count
     return {"followers": followers}
 
-@app.get("/post/{user}")
-def post_user(user):
+@app.get("/average_like/{user}")
+def average_like(user):
     # https://developer.twitter.com/en/docs/labs/tweet-metrics/api-reference/get-tweets-metrics
+    # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/tweet
     public_tweets = api.user_timeline(user, count=100,include_rts=False)
-    tweets = []
+    likes = []
     i = 0
     for tweet in public_tweets:
-        tweet = tweet.id
-        status = api.get_status(tweet)
-        favorite_count = status.favorite_count
-        if favorite_count != 0:
-            tweets.append(favorite_count)
+        like = tweet.favorite_count
+        likes.append(like)
         i += 1
-    somme = sum(tweets)
+    somme = sum(likes)
     averageLike = somme / i
-    print(int(averageLike))
+    averageLike = int(averageLike)
 
-    return tweets, i
-
-
-@app.get("/numberlikes/{user}")
-def number_user_liked_sendes(user):
-    user = api.get_user(user)
-    likes = user.favourites_count
-
-    return {"likes": likes}
+    return averageLike
 
 # Séparer la pollution direct/indirect 
 
-
-
 @app.get("/pic/{user}")
 def pic(user):
-# Image size <= 5 MB, animated GIF size <= 15 MB
-
+    # Image size <= 5 MB, animated GIF size <= 15 MB
     public_tweets = api.user_timeline(user, count=1)
     tweets = []
-
-    i = 0
+    # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
     for tweet in public_tweets:
         media = tweet.entities["media"]
         tweets.append(media[0]["type"])
 
     return {"msg": tweets}
     
-# https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+
 
 
 @app.get("/pollution/{user}")
-def pollution_direct(user):
+def pollution(user):
 # 
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
     # / INFOS
+    username = user
     user = api.get_user(user)
     name = user.name
     surname = user.screen_name
     followers = user.followers_count
     profilePic = user.profile_image_url_https
+    following = user.friends_count
     dateBegin = user.created_at
-    
 #
     # / POLLUTION
     # // DIRECT
 
-    likes = user.favourites_count
+    averageLike = average_like(username)
+    likesSent = user.favourites_count
     posts = user.statuses_count
-    print(likes,posts)
+    print(averageLike)
+
 
     
-
-
     return {
-        # INFOS
+    "data-twitter": [
+        {
         "NAME": name,
         "@surname": "@"+surname,
         "followers": followers,
         "profilPicURL": profilePic,
-        "dateBegin": dateBegin,
-    #####################
-        # POLLUTION
-        # // DIRECT
-
-
-    }
+        "following": following,
+    
+        }
+    ],
+    "data-eco":[
+        {
+        "pollutionDirect":"2356",
+        "pollutionIndirect":"10000",
+        "text": "20",
+        "video":"30",
+        "image":"50",
+        "score":"50"
+        }
+    ]
+}
 
