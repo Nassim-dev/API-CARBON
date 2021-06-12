@@ -20,7 +20,12 @@ auth = tweepy.AppAuthHandler(
 
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
-# NAssim
+# Specifies the number of Tweets to try and retrieve, up to a maximum of 200 per distinct request
+# Returns recent Tweets posted
+def public_Tweets(user):
+    # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
+    public_tweets = api.user_timeline(user, count=200,include_rts=False)
+    return public_tweets
 
 @app.get("/")
 def index():
@@ -28,10 +33,14 @@ def index():
 
 @app.get("/users/{user}")
 def read_root(user):
-    public_tweets = api.user_timeline(user, count=3)
+    public_tweets = public_Tweets(user)
     tweets = []
+    print(public_tweets)
+    i = 0
     for tweet in public_tweets:
         tweets.append(tweet.text)
+        i += 1
+    print(i)
     return {"msg": tweets}
 
 @app.get("/followers/{user}")
@@ -40,36 +49,67 @@ def follow_user(user):
     followers = user.followers_count
     return {"followers": followers}
 
-@app.get("/average_like/{user}")
-def average_like(user):
+@app.get("/average/{user}")
+def Average(user):
     # https://developer.twitter.com/en/docs/labs/tweet-metrics/api-reference/get-tweets-metrics
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/tweet
-    public_tweets = api.user_timeline(user, count=100,include_rts=False)
+    public_tweets = public_Tweets(user)
     likes = []
+    retweets = []
+    # Comments object is only available with the Premium and Enterprise tier products.
+
+    pics = 0
+    texts = 0
+    videos = 0
+
     i = 0
     for tweet in public_tweets:
+
         like = tweet.favorite_count
         likes.append(like)
+
+        retweet = tweet.retweet_count
+        retweets.append(retweet)
+
         i += 1
     somme = sum(likes)
     averageLike = somme / i
     averageLike = int(averageLike)
 
-    return averageLike
+    sommeRetweets = sum(retweets)
+    averageRetweet = sommeRetweets / i
+    averageRetweet = int(averageRetweet)
+
+    return {"like": averageLike, "retweet": averageRetweet}
 
 # Séparer la pollution direct/indirect 
 
 @app.get("/pic/{user}")
 def pic(user):
     # Image size <= 5 MB, animated GIF size <= 15 MB
-    public_tweets = api.user_timeline(user, count=1)
-    tweets = []
+    public_tweets = api.user_timeline(user, count=4)
+    pic = 0
+    vid = 0
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
     for tweet in public_tweets:
         media = tweet.entities["media"]
-        tweets.append(media[0]["type"])
+        type = media[0]["type"]
 
-    return {"msg": tweets}
+        if type == "photo":
+            pic += 1
+        elif type == "video":
+            vid += 1
+        
+
+    return {"numberPic": pic}
+
+@app.get("/pollution_direct/{user}")
+def pollution_direct(user):
+    
+    user = api.get_user(user)
+    numbersPost = user.statuses_count
+    return numbersPost
+
     
 
 
@@ -77,7 +117,6 @@ def pic(user):
 @app.get("/pollution/{user}")
 def pollution(user):
 # 
-    # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
     # / INFOS
     username = user
     user = api.get_user(user)
@@ -91,7 +130,9 @@ def pollution(user):
     # / POLLUTION
     # // DIRECT
 
-    averageLike = average_like(username)
+    average = Average(username)
+    averageLike = average["like"]
+    averageRetweet = average["retweet"]
     likesSent = user.favourites_count
     posts = user.statuses_count
     print(averageLike)
@@ -101,7 +142,7 @@ def pollution(user):
     return {
     "data-twitter": [
         {
-        "NAME": name,
+        "name": name,
         "@surname": "@"+surname,
         "followers": followers,
         "profilPicURL": profilePic,
