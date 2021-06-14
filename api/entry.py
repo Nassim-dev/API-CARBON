@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import tweepy, os
+import json
+# public_tweets = json.dumps(public_tweets._json)
 
 app = FastAPI()
 
@@ -24,7 +26,8 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 # Returns recent Tweets posted
 def public_Tweets(user):
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
-    public_tweets = api.user_timeline(user, count=200,include_rts=False)
+    # On inclue les retweets pour les calculs 
+    public_tweets = api.user_timeline(user, count=200,include_rts=True)
     return public_tweets
 
 @app.get("/")
@@ -35,7 +38,7 @@ def index():
 def read_root(user):
     public_tweets = public_Tweets(user)
     tweets = []
-    print(public_tweets)
+
     i = 0
     for tweet in public_tweets:
         tweets.append(tweet.text)
@@ -43,11 +46,6 @@ def read_root(user):
     print(i)
     return {"msg": tweets}
 
-@app.get("/followers/{user}")
-def follow_user(user):
-    user = api.get_user(user)
-    followers = user.followers_count
-    return {"followers": followers}
 
 @app.get("/average/{user}")
 def Average(user):
@@ -57,11 +55,9 @@ def Average(user):
     likes = []
     retweets = []
     # Comments object is only available with the Premium and Enterprise tier products.
-
     pics = 0
     texts = 0
     videos = 0
-
     i = 0
     for tweet in public_tweets:
 
@@ -87,21 +83,35 @@ def Average(user):
 @app.get("/pic/{user}")
 def pic(user):
     # Image size <= 5 MB, animated GIF size <= 15 MB
-    public_tweets = api.user_timeline(user, count=4)
+    public_tweets = api.user_timeline(user, count=20,include_rts=True)
     pic = 0
     vid = 0
+    txt = 0
+ 
+    # public_tweets = public_tweets[0]
+    # ext_entities = public_tweets.extended_entities
+    # media = ext_entities["media"]
+    # type = media[0]["type"]
+    # print(type)
+
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
     for tweet in public_tweets:
-        media = tweet.entities["media"]
-        type = media[0]["type"]
 
-        if type == "photo":
-            pic += 1
-        elif type == "video":
-            vid += 1
+        try:
+            ext_entities = tweet.extended_entities
+            media = ext_entities["media"]
+            type = media[0]["type"]
+            print(type)
         
+        except:
+            print("TXT")
 
-    return {"numberPic": pic}
+        # if type == "photo":
+        #     pic += 1
+        # elif type == "video":
+        #     vid += 1
+
+    # return {"numberPic": pic, "numberVid": vid}
 
 @app.get("/pollution_direct/{user}")
 def pollution_direct(user):
