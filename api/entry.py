@@ -158,18 +158,18 @@ def pollutionDirect(data):
         moyenneCharactTxt = totalCharacters/txt
 
     posts = user.statuses_count    
-
+    likesSent = user.favourites_count
     totalSommes = (moyenneTxt * (moyenneCharactTxt * pollution1character)) + (moyennePic * pollution1photo) + (moyenneVid *(moyenneDuréeVid * pollutionParSecondeVid))
-    pollutionDirect = totalSommes * posts
-    pollutionDirect = int(pollutionDirect)
+    pollutionDirect = totalSommes * (posts + likesSent)
+    pollutionDirect = round(pollutionDirect)
 
     return {"pollutionDirect":pollutionDirect, "moyenneTxt":moyenneTxt, "moyenneVid":moyenneVid, "moyennePic":moyennePic}
 
 
-@app.get("/data-json/{user}")
+@app.get("/user/{user}")
 def dataJson(user):
 # 
-    # / INFOS
+    # / INFOS utilisateur
     requeteData = publicTweetsData(user)
     username = user
     user = requeteData[0].user
@@ -187,6 +187,8 @@ def dataJson(user):
 
     pollution_DirectData = pollutionDirect(requeteData)
     pollution_Direct = pollution_DirectData["pollutionDirect"]
+    if pollution_Direct == 0:
+        pollution_Direct = 10
 
     # // graphPollutionBySource
 
@@ -213,7 +215,8 @@ def dataJson(user):
     rapportIndirect = round(rapportIndirect,2)
 
     # // Score
-    score = 0
+    # J'ai pris les unités du nombre de following pour éviter d'avoir le même score, rien de scientifique
+    score = following%10
     seuil = 10000
     if sommePollutions < seuil:
         score += 30
