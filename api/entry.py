@@ -3,21 +3,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from pydantic import BaseModel
 import tweepy, os
-import json
 
+# App Init
 app = FastAPI()
+
+# CORS (Cross-Origin Resource Sharing) 
+origins = [
+    "http://carbon.netlify.app",
+    "https://carbon.netlify.app",
+    "http://localhost:9000"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins="*",
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# Twitter client Init
 auth = tweepy.AppAuthHandler(
     os.environ.get('TWITTER_API_KEY'), 
     os.environ.get('TWITTER_SECRET_KEY')
@@ -28,24 +35,22 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 # Specifies the number of Tweets to try and retrieve, up to a maximum of 200 per distinct request
 # Returns recent Tweets posted
 def publicTweetsData(user):
-    # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
-    # On inclue les retweets pour les calculs
-    # On récupère toutes l'activités de l'utilisateur
+    """ https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
+      On inclue les retweets pour les calculs
+      On récupère toutes l'activités de l'utilisateur """
     publicTweets = api.user_timeline(user, count=200,include_rts=True)
     return publicTweets    
 
+# Routing
 @app.get("/")
 def index():
-    return "Hello Carbon 👋"
+    return "Hello from Carbon 👋"
 
-@app.get("/pollutionIndirect/{user}")
+@app.get("/pollution-indirect/{user}")
 def pollutionIndirect(data):
-
     # La pollution Indirect représente la pollution généré par ses posts indirectement
-
     requeteData = data
     # requeteData = publicTweetsData(user)
-
     # Moyenne des likes et Retweets 
     average = Average(requeteData)
     averageLike = average["like"]
@@ -63,12 +68,10 @@ def pollutionIndirect(data):
     pollution_Indirect = ((moyPollutionParPost * averageLike)+(moyPollutionParPost * averageRetweet)) * posts
     pollution_Indirect = int(pollution_Indirect)
 
-    return {"pollution_Indirect": pollution_Indirect}
+    return {"pollutionIndirect": pollution_Indirect}
 
 
     
-    
-
 @app.get("/average/{user}")
 def Average(data):
     # https://developer.twitter.com/en/docs/labs/tweet-metrics/api-reference/get-tweets-metrics
@@ -96,11 +99,10 @@ def Average(data):
     sommeRetweets = sum(retweets)
     averageRetweet = sommeRetweets / i
     averageRetweet = round(averageRetweet,1)
-
     return {"like": averageLike, "retweet": averageRetweet}
 
 
-@app.get("/pollutionDirect/{user}")
+@app.get("/pollution-direct/{user}")
 def pollutionDirect(data):
     # Image size <= 5 MB, animated GIF size <= 15 MB
     requeteData = data
@@ -168,29 +170,20 @@ def pollutionDirect(data):
 
 @app.get("/user/{user}")
 def dataJson(user):
-# 
-    # / INFOS utilisateur
     requeteData = publicTweetsData(user)
-    username = user
     user = requeteData[0].user
     name = user.name
-    surname = user.screen_name
+    username = user.screen_name
     followers = user.followers_count
     profilePiclink = user.profile_image_url_https
     profilePic = profilePiclink.replace('_normal','')
     
     following = user.friends_count
-    dateBegin = user.created_at
-#
-    # / POLLUTION
-    # // DIRECT
 
     pollution_DirectData = pollutionDirect(requeteData)
     pollution_Direct = pollution_DirectData["pollutionDirect"]
     if pollution_Direct == 0:
         pollution_Direct = 10
-
-    # // graphPollutionBySource
 
     moyText = pollution_DirectData["moyenneTxt"] * 100
     moyText = round(moyText,1)
@@ -202,8 +195,7 @@ def dataJson(user):
     sommeOutils = moyText + moyVid + moyPic
     moyGif = 100 - sommeOutils
 
-
-    # // Indirect
+    # Indirect Polution
     pollution_Indirect = pollutionIndirect(requeteData)
     pollution_Indirect = pollution_Indirect["pollution_Indirect"]
 
@@ -214,7 +206,7 @@ def dataJson(user):
     rapportIndirect = (pollution_Indirect * 100) / sommePollutions
     rapportIndirect = round(rapportIndirect,2)
 
-    # // Score
+    # Score
     # J'ai pris les unités du nombre de following pour éviter d'avoir le même score, rien de scientifique
     score = following%10
     seuil = 10000
@@ -235,42 +227,38 @@ def dataJson(user):
         if pollution_Direct <= 100:
             score -= 15
 
-
-
+    # Creating the response
     data = {
-    "userData": 
-        {
-        "fullname": name,
-        "username": "@"+surname,
-        "followers": followers,
-        "imageUrl": profilePic,
-        "following": following,
-        "score": score,
-        },
-    "dataEco":
-        {
-        "graphDirectPollution":{
-            "pollutionDirect":pollution_Direct,
+    "userData": {
+            "fullname": name,
+            "username": "@"+username,
+            "followers": followers,
+            "imageUrl": profilePic,
+            "following": following,
+            "score": score,
         },
 
-        "graphRapportDirectIndirect":{
+    "dataEco": {
+            "graphByComparaison":{
+                "pollutionDirect":pollution_Direct,
+            },
 
-            "pollutionDirect": pollution_Direct,
-            "pollutionIndirect": pollution_Indirect,
-            "rapport%": rapportIndirect
-        },
+            "graphByType":{
+                "pollutionDirect": pollution_Direct,
+                "pollutionIndirect": pollution_Indirect,
+                "rapport": rapportIndirect
+            },
 
-        "graphPollutionBySource":{
-            "text%": moyText,
-            "video%": moyVid,
-            "pic%": moyPic,
-            "gif%": moyGif
-        },
-        
+            "graphBySource":{
+                "texts": moyText,
+                "videos": moyVid,
+                "images": moyPic,
+                "gifs": moyGif
+            },
         }
-    
     }
 
+    # Serialisation
     json_compatible_item_data = jsonable_encoder(data)
-
+    # Sending the response
     return JSONResponse(content=json_compatible_item_data)
