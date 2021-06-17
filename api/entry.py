@@ -223,7 +223,7 @@ def dataJson(user):
         elif pollution_Direct >= 100 and pollution_Direct < 250:
             score += 5
     else:
-        score += 100
+        score = 100
         if pollution_Direct <= 100:
             score -= 15
 
