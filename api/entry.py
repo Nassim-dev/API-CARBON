@@ -177,7 +177,7 @@ def pollutionDirect(data):
     return {"pollutionDirect":pollutionDirect, "moyenneTxt":moyenneTxt, "moyenneVid":moyenneVid, "moyennePic":moyennePic}
 
 
-@app.get("/data-json/{user}")
+@app.get("/user/{user}")
 def dataJson(user):
 # 
     # / INFOS
