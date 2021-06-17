@@ -68,7 +68,7 @@ def pollutionIndirect(data):
     pollution_Indirect = ((moyPollutionParPost * averageLike)+(moyPollutionParPost * averageRetweet)) * posts
     pollution_Indirect = int(pollution_Indirect)
 
-    return {"pollutionIndirect": pollution_Indirect}
+    return {"pollution_Indirect": pollution_Indirect}
 
 
     
