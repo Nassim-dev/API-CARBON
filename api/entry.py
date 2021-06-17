@@ -12,6 +12,8 @@ app = FastAPI()
 origins = [
     "http://carbon.netlify.app",
     "https://carbon.netlify.app",
+    "http://carbon.younessidbakkasse.com",
+    "https://carbon.younessidbakkasse.com",
     "http://localhost:9000"
 ]
 
@@ -251,7 +253,7 @@ def dataJson(user):
         },
 
     "dataEco": {
-            "graphByComparaison":{
+            "graphByScore":{
                 "pollutionDirect":pollution_Direct,
             },
 
