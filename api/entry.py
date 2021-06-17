@@ -29,38 +29,24 @@ api = tweepy.API(auth, wait_on_rate_limit=True)
 # Returns recent Tweets posted
 def publicTweetsData(user):
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/user
-    # On inclue les retweets pour les calculs 
+    # On inclue les retweets pour les calculs
+    # On récupère toutes l'activités de l'utilisateur
     publicTweets = api.user_timeline(user, count=200,include_rts=True)
     return publicTweets    
 
 @app.get("/")
 def index():
-    return "Hello pip👋"
-
-@app.get("/test/{user}")
-def test(user):
-    requeteData = publicTweetsData(user)
-    pic = 0
-    vid = 0
-    
-    data = requeteData[0]   
-
-    ext_entities = data.extended_entities
-    media = ext_entities["media"]
-    _type = media[0]["_type"]
-    if _type == "photo":
-        pic += 1
-    elif _type == "video":
-        vid += 1
-        infos = media[0]["video_info"]
-    
+    return "Hello Carbon 👋"
 
 @app.get("/pollutionIndirect/{user}")
 def pollutionIndirect(data):
 
+    # La pollution Indirect représente la pollution généré par ses posts indirectement
+
     requeteData = data
     # requeteData = publicTweetsData(user)
 
+    # Moyenne des likes et Retweets 
     average = Average(requeteData)
     averageLike = average["like"]
     averageRetweet = average["retweet"]
@@ -71,6 +57,7 @@ def pollutionIndirect(data):
     pollution_Direct = pollutionDirect(requeteData)
     pollution_Direct = pollution_Direct["pollutionDirect"]
 
+    # La pollution moyenne d'un post 
     moyPollutionParPost = pollution_Direct / posts
 
     pollution_Indirect = ((moyPollutionParPost * averageLike)+(moyPollutionParPost * averageRetweet)) * posts
@@ -112,7 +99,6 @@ def Average(data):
 
     return {"like": averageLike, "retweet": averageRetweet}
 
-# Séparer la pollution direct/indirect 
 
 @app.get("/pollutionDirect/{user}")
 def pollutionDirect(data):
@@ -134,6 +120,8 @@ def pollutionDirect(data):
     user = requeteData[0].user
     # ext_entities = public_tweets.extended_entities
     # https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/object-model/entities
+
+    # On va séparer les types de posts
     for tweet in requeteData:
         text = tweet.text
         totalCharacters += len(text)
@@ -147,6 +135,7 @@ def pollutionDirect(data):
             elif _type == "video":
                 vid += 1
                 infos = media[0]["video_info"]
+                # On récupère la durée de la video
                 seconde = infos["duration_millis"] / 1000
                 vidSeconde += seconde
             elif _type == "animated_gif":
@@ -169,10 +158,10 @@ def pollutionDirect(data):
         moyenneCharactTxt = totalCharacters/txt
 
     posts = user.statuses_count    
-
+    likesSent = user.favourites_count
     totalSommes = (moyenneTxt * (moyenneCharactTxt * pollution1character)) + (moyennePic * pollution1photo) + (moyenneVid *(moyenneDuréeVid * pollutionParSecondeVid))
-    pollutionDirect = totalSommes * posts
-    pollutionDirect = int(pollutionDirect)
+    pollutionDirect = totalSommes * (posts + likesSent)
+    pollutionDirect = round(pollutionDirect)
 
     return {"pollutionDirect":pollutionDirect, "moyenneTxt":moyenneTxt, "moyenneVid":moyenneVid, "moyennePic":moyennePic}
 
@@ -180,7 +169,7 @@ def pollutionDirect(data):
 @app.get("/user/{user}")
 def dataJson(user):
 # 
-    # / INFOS
+    # / INFOS utilisateur
     requeteData = publicTweetsData(user)
     username = user
     user = requeteData[0].user
@@ -198,6 +187,8 @@ def dataJson(user):
 
     pollution_DirectData = pollutionDirect(requeteData)
     pollution_Direct = pollution_DirectData["pollutionDirect"]
+    if pollution_Direct == 0:
+        pollution_Direct = 10
 
     # // graphPollutionBySource
 
@@ -224,14 +215,16 @@ def dataJson(user):
     rapportIndirect = round(rapportIndirect,2)
 
     # // Score
-    score = 0
-    if sommePollutions < 10000:
+    # J'ai pris les unités du nombre de following pour éviter d'avoir le même score, rien de scientifique
+    score = following%10
+    seuil = 10000
+    if sommePollutions < seuil:
         score += 30
         if pollution_Direct <= 100:
             score -= 15
         elif pollution_Direct >= 100 and pollution_Direct <= 250:
             score += 5
-    elif sommePollutions >= 10000 and sommePollutions <= 5000:
+    elif sommePollutions >= seuil and sommePollutions <= 5000:
         score += 70
         if pollution_Direct <= 100:
             score -= 15
@@ -245,40 +238,37 @@ def dataJson(user):
 
 
     data = {
-    "dataTwitter": [
+    "userData": 
         {
-        "name": name,
-        "surname": "@"+surname,
+        "fullname": name,
+        "username": "@"+surname,
         "followers": followers,
-        "profilPicUrl": profilePic,
+        "imageUrl": profilePic,
         "following": following,
-        }
-    ],
-    "dataEco":[
-        {
         "score": score,
-
-        "graphDirectPollution":[{
+        },
+    "dataEco":
+        {
+        "graphDirectPollution":{
             "pollutionDirect":pollution_Direct,
-            "seuilMax": 1000
-        }],
+        },
 
-        "graphRapportDirectIndirect":[{
+        "graphRapportDirectIndirect":{
 
             "pollutionDirect": pollution_Direct,
             "pollutionIndirect": pollution_Indirect,
             "rapport%": rapportIndirect
-        }],
+        },
 
-        "graphPollutionBySource":[{
+        "graphPollutionBySource":{
             "text%": moyText,
             "video%": moyVid,
             "pic%": moyPic,
             "gif%": moyGif
-        }],
+        },
         
         }
-    ]
+    
     }
 
     json_compatible_item_data = jsonable_encoder(data)
