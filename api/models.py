@@ -1,1 +1,1 @@
-print('hello from databse')
+print('Hello, we dont need a DB since we are using Twitter DB throught its API.')
