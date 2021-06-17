@@ -12,6 +12,7 @@ app = FastAPI()
 origins = [
     "http://carbon.netlify.app",
     "https://carbon.netlify.app",
+    "http://localhost:9000"
 ]
 
 app.add_middleware(
