@@ -21,6 +21,7 @@ requests = {version = "==2.25.1", extras = ["socks"]}
 six = "==1.16.0"
 urllib3 = "==1.26.5"
 PySocks = "==1.7.1"
+gunicorn = "*"
 
 [dev-packages]
 
