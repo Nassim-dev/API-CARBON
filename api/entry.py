@@ -161,10 +161,18 @@ def pollutionDirect(data):
     if txt != 0:
         moyenneCharactTxt = totalCharacters/txt
 
+#  Prise en compte des likes que l'utilisateur a envoyé, il est donc responsable de la pollution que cela entraine même s'il n'est responsable du contenu
     posts = user.statuses_count    
     likesSent = user.favourites_count
-    totalSommes = (moyenneTxt * (moyenneCharactTxt * pollution1character)) + (moyennePic * pollution1photo) + (moyenneVid *(moyenneDuréeVid * pollutionParSecondeVid))
-    pollutionDirect = totalSommes * (posts + likesSent)
+    # Pour améliorer le résultat de la partie pollution direct
+    # username = user.screen_name
+    # listliked = api.favorites(screen_name= username, count=200)
+    # picliked = 0
+    # vidliked = 0
+    # txtliked = 0
+
+    totalSommesMoy = (moyenneTxt * (moyenneCharactTxt * pollution1character)) + (moyennePic * pollution1photo) + (moyenneVid *(moyenneDuréeVid * pollutionParSecondeVid))
+    pollutionDirect = (totalSommesMoy * posts) + (totalSommesMoy * likesSent)
     pollutionDirect = round(pollutionDirect)
 
     return {"pollutionDirect":pollutionDirect, "moyenneTxt":moyenneTxt, "moyenneVid":moyenneVid, "moyennePic":moyennePic}
@@ -212,22 +220,26 @@ def dataJson(user):
     # J'ai pris les unités du nombre de following pour éviter d'avoir le même score, rien de scientifique
     score = following%10
     seuil = 10000
+    pollutionFaible = 100
+    polltionModere = 250
     if sommePollutions < seuil:
         score += 30
-        if pollution_Direct <= 100:
+        if pollution_Direct <= pollutionFaible:
             score -= 15
-        elif pollution_Direct >= 100 and pollution_Direct <= 250:
+        elif pollution_Direct >= pollutionFaible and pollution_Direct <= polltionModere:
             score += 5
     elif sommePollutions >= seuil and sommePollutions <= 5000:
         score += 70
-        if pollution_Direct <= 100:
+        if pollution_Direct <= pollutionFaible:
             score -= 15
-        elif pollution_Direct >= 100 and pollution_Direct < 250:
+        elif pollution_Direct >= pollutionFaible and pollution_Direct < polltionModere:
             score += 5
     else:
-        score += 100
+        score = 100
         if pollution_Direct <= 100:
             score -= 15
+        elif pollution_Direct >= pollutionFaible and pollution_Direct < polltionModere:
+            score -= 5
 
     # Creating the response
     data = {
