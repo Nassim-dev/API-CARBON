@@ -48,6 +48,10 @@ def publicTweetsData(user):
 def index():
     return "Hello from Carbon 👋"
 
+@app.get("/favicon.ico")
+def favicon():
+    return "Hello from Carbon 👋"
+
 @app.get("/pollution-indirect/{user}")
 def pollutionIndirect(data):
     # La pollution Indirect représente la pollution généré par ses posts indirectement
