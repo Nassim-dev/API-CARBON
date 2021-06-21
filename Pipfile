@@ -24,6 +24,7 @@ PySocks = "==1.7.1"
 gunicorn = "*"
 uvloop = "*"
 httptools = "*"
+heroku = "*"
 
 [dev-packages]
 
