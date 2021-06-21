@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "134815e322c190a123b653c7931901dcf2c05caaa3aa3b98c7f02e7a19d1578d"
+            "sha256": "e0ce874a2b6074375f2cceb5ed85503b80960292e166a7b7c8b85bfa8463d331"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -151,6 +151,14 @@
             ],
             "version": "==1.5"
         },
+        "rails": {
+            "hashes": [
+                "sha256:256392cfd835b576ae997707523f11891f40d73102f898fb25471bc69168688e",
+                "sha256:7b483adced7fe4768677d5fa28d9f5af635d191d58ef84ffa1b3508cc9f7f5ed"
+            ],
+            "index": "pypi",
+            "version": "==0.0.5"
+        },
         "requests": {
             "extras": [
                 "socks"
@@ -235,6 +243,14 @@
             ],
             "index": "pypi",
             "version": "==0.15.2"
+        },
+        "webob": {
+            "hashes": [
+                "sha256:73aae30359291c14fa3b956f8b5ca31960e420c28c1bec002547fb04928cf89b",
+                "sha256:b64ef5141be559cfade448f044fa45c2260351edcb6a8ef6b7e00c7dcef0c323"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==1.8.7"
         }
     },
     "develop": {}

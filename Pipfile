@@ -25,6 +25,7 @@ gunicorn = "*"
 uvloop = "*"
 httptools = "*"
 heroku = "*"
+rails = "*"
 
 [dev-packages]
 
