@@ -14,7 +14,9 @@ origins = [
     "https://carbon.netlify.app",
     "http://carbon.younessidbakkasse.com",
     "https://carbon.younessidbakkasse.com",
-    "http://localhost:9000"
+    "http://localhost:9000",
+    "https://carbon-twitter.netlify.app/",
+    "http://carbon-twitter.netlify.app/"
 ]
 
 app.add_middleware(
