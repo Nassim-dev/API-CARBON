@@ -23,7 +23,7 @@ Nous avons bien séparé la partie Front et Back.
 Nous avons séparé en deux branches une dev et une prod, tous les test se sont fait en local.
 
 ## Technologies côté back-end:
-- [Docker](https://docs.docker.com/) est un logiciel libre permettant de créer des contenuers logiciels. Dans une équipe, chaque personne a différent système d'exploitation, et des versions différentes, cela peut créer des problèmes en productions. L'avantage de Docker est de permettre de créer et travailler dans un environnement qui tourne dans tout type d'ordinateur et serveur, ce dernier nous a beaucoup facilité l'hébergement de notre API avec un seul ligne de commande, on a pu héberger notre API sur [DigitalOcean](https://www.digitalocean.com/products/droplets/) sur un Droplet(serveur Linux Ubunto aui vient avec Docker et Git installés.), pour transfer les fichier de notre machine en local au serveur en 138.68.103.215, on a utilisé git avec un ```git pull origin prod```en suite on a lancé la container de l'application basé sur Python v3.9 avec la commande ```docker compose up```.
+- [Docker](https://docs.docker.com/) est un logiciel libre permettant de créer des contenuers logiciels. Dans une équipe, chaque personne a différent système d'exploitation, et des versions différentes, cela peut créer des problèmes en productions. L'avantage de Docker est de permettre de créer et travailler dans un environnement qui tourne dans tout type d'ordinateur et serveur, ce dernier nous a beaucoup facilité l'hébergement de notre API avec un seul ligne de commande, on a pu héberger notre API sur [DigitalOcean](https://www.digitalocean.com/products/droplets/) sur un Droplet(serveur Linux Ubunto aui vient avec Docker et Git installés.), pour transfer les fichier de notre machine en local au serveur en 138.68.103.215, on a utilisé git avec un ```git pull origin prod```en suite on a lancé la container de l'application basé sur Python v3.9 avec la commande ```docker compose up```. Pour des raisons de sécurité et de bon fonctionnement, je l'ai hébergé sur [Heroku](https://carbon-apirest.herokuapp.com/).
 
 - [FastAPI](https://fastapi.tiangolo.com/) est un framework web pour construire des API sur Python. Il est très rapide et simple d'utilisation, avec une documentation bien construite. (c'est comme Flask pour les connaisseurs)
 
@@ -53,10 +53,10 @@ durée max video = 2mn20
 video = 13.5g EqCO2 max per minute on server
  
  ## Lien d'accès à l'API:
-http://138.68.103.215/
+https://carbon-apirest.herokuapp.com/
   
-### points d'accées:
-On a plusuiers points d'accées mais le principale pour récuperer la data sous format .json traités est: http://138.68.103.215/user/<username> exemple pour tester http://138.68.103.215/user/cristiano avec username est pseudo twitter de l'utilisateur, notre API est sécurisé avec CORS, donc personne ne peut l'utiliser que notre site hébergé sur netlify.
+### Points d'accées:
+On a plusieurs points d'accées mais le principale pour récuperer la data sous format .json traités est: https://carbon-apirest.herokuapp.com/user/<username>, exemple pour tester https://carbon-apirest.herokuapp.com/user/cristiano avec user/pseudo twitter de l'utilisateur, notre API est sécurisé avec CORS, donc personne ne peut l'utiliser que notre site hébergé sur netlify.
   
  L'équipe Back-End CARBON :)
 
