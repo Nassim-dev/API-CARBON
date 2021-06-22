@@ -1,5 +1,5 @@
 # Back-End for CARBON ©
-Link -> [CARBON](https://carbon-twitter.netlify.app/)
+➡️ [CARBON](https://carbon-twitter.netlify.app/)
 
 ## Présentation du projet:
 
@@ -63,5 +63,5 @@ On a plusieurs points d'accées mais le principale pour récuperer la data sous 
 
 ### Contributeurs:
 
-- Nassim Yazi (Calculs/API)
+- Nassim YAZI (Calculs/API/Sécurité/Hébergement)
 - Youness Ib Bakkasse (Choix de techno/Sécurité/Hébergement)
